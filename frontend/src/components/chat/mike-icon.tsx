@@ -88,7 +88,7 @@ function Blades({ ids }: { ids: Record<string, string> }) {
     );
 }
 
-export function MikeIcon({
+export function MatrixAIIcon({
     spin = false,
     done = false,
     error = false,

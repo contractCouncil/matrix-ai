@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown, Loader2, Upload, X } from "lucide-react";
-import type { MikeDocument, MikeProject, MikeWorkflow } from "../shared/types";
+import type { MatrixAIDocument, MatrixAIProject, MatrixAIWorkflow } from "../shared/types";
 import {
     getProject,
     listProjects,
@@ -22,11 +22,11 @@ interface Props {
         title: string,
         projectId?: string,
         documentIds?: string[],
-        columnsConfig?: MikeWorkflow["columns_config"],
+        columnsConfig?: MatrixAIWorkflow["columns_config"],
     ) => void;
-    projects?: MikeProject[];
+    projects?: MatrixAIProject[];
     /** When provided, skip the project/directory picker and show only these docs */
-    projectDocs?: MikeDocument[];
+    projectDocs?: MatrixAIDocument[];
     projectName?: string;
     projectCmNumber?: string | null;
 }
@@ -47,12 +47,12 @@ export function AddNewTRModal({
     const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
 
     // Project-scoped docs (when underProject is true and no fixedProjectDocs)
-    const [projectDocs, setProjectDocs] = useState<MikeDocument[]>([]);
+    const [projectDocs, setProjectDocs] = useState<MatrixAIDocument[]>([]);
     const [loadingDocs, setLoadingDocs] = useState(false);
 
     // Full directory (when underProject is false)
-    const [standaloneDocs, setStandaloneDocs] = useState<MikeDocument[]>([]);
-    const [directoryProjects, setDirectoryProjects] = useState<MikeProject[]>(
+    const [standaloneDocs, setStandaloneDocs] = useState<MatrixAIDocument[]>([]);
+    const [directoryProjects, setDirectoryProjects] = useState<MatrixAIProject[]>(
         [],
     );
     const [loadingDirectory, setLoadingDirectory] = useState(false);
@@ -64,7 +64,7 @@ export function AddNewTRModal({
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Workflow templates
-    const [workflows, setWorkflows] = useState<MikeWorkflow[]>([]);
+    const [workflows, setWorkflows] = useState<MatrixAIWorkflow[]>([]);
     const [loadingWorkflows, setLoadingWorkflows] = useState(false);
     const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(
         null,
@@ -205,7 +205,7 @@ export function AddNewTRModal({
         : underProject
           ? []
           : directoryProjects;
-    const flatProjectDocs: MikeDocument[] =
+    const flatProjectDocs: MatrixAIDocument[] =
         !isProjectMode && underProject ? projectDocs : [];
     const directoryLoading = isProjectMode
         ? false

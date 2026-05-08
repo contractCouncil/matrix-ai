@@ -3,15 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { X, MessageSquare, Table2 } from "lucide-react";
 import { createWorkflow, updateWorkflow } from "@/app/lib/mikeApi";
-import type { MikeWorkflow } from "../shared/types";
+import type { MatrixAIWorkflow } from "../shared/types";
 import { PRACTICE_OPTIONS } from "./practices";
 
 interface Props {
     open: boolean;
     onClose: () => void;
-    onCreated: (workflow: MikeWorkflow) => void;
-    editWorkflow?: MikeWorkflow;
-    onUpdated?: (workflow: MikeWorkflow) => void;
+    onCreated: (workflow: MatrixAIWorkflow) => void;
+    editWorkflow?: MatrixAIWorkflow;
+    onUpdated?: (workflow: MatrixAIWorkflow) => void;
 }
 
 export function NewWorkflowModal({ open, onClose, onCreated, editWorkflow, onUpdated }: Props) {

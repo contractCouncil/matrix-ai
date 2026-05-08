@@ -19,13 +19,13 @@ import {
     hideWorkflow,
     unhideWorkflow,
 } from "@/app/lib/mikeApi";
-import type { MikeWorkflow } from "../shared/types";
+import type { MatrixAIWorkflow } from "../shared/types";
 import { BUILT_IN_WORKFLOWS, BUILT_IN_IDS } from "./builtinWorkflows";
 import { DisplayWorkflowModal } from "./DisplayWorkflowModal";
 import { NewWorkflowModal } from "./NewWorkflowModal";
 import { ToolbarTabs } from "../shared/ToolbarTabs";
 import { RowActions } from "../shared/RowActions";
-import { MikeIcon } from "@/components/chat/mike-icon";
+import { MatrixAIIcon } from "@/components/chat/mike-icon";
 import { useAuth } from "@/contexts/AuthContext";
 
 type Tab = "all" | "builtin" | "custom" | "hidden";
@@ -43,9 +43,9 @@ const TABS: { id: Tab; label: string }[] = [
 export function WorkflowList() {
     const router = useRouter();
     const { user } = useAuth();
-    const [custom, setCustom] = useState<MikeWorkflow[]>([]);
+    const [custom, setCustom] = useState<MatrixAIWorkflow[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selected, setSelected] = useState<MikeWorkflow | null>(null);
+    const [selected, setSelected] = useState<MatrixAIWorkflow | null>(null);
     const [activeTab, setActiveTab] = useState<Tab>("all");
     const [newModalOpen, setNewModalOpen] = useState(false);
     const [hiddenBuiltinIds, setHiddenBuiltinIds] = useState<string[]>([]);
@@ -53,7 +53,7 @@ export function WorkflowList() {
     const [actionsOpen, setActionsOpen] = useState(false);
     const [practiceFilter, setPracticeFilter] = useState<string | null>(null);
     const [practiceFilterOpen, setPracticeFilterOpen] = useState(false);
-    const [typeFilter, setTypeFilter] = useState<MikeWorkflow["type"] | null>(
+    const [typeFilter, setTypeFilter] = useState<MatrixAIWorkflow["type"] | null>(
         null,
     );
     const [typeFilterOpen, setTypeFilterOpen] = useState(false);
@@ -199,7 +199,7 @@ export function WorkflowList() {
         await Promise.all(ids.map((id) => unhideWorkflow(id).catch(() => {})));
     }
 
-    const getTypeMeta = (type: MikeWorkflow["type"]) =>
+    const getTypeMeta = (type: MatrixAIWorkflow["type"]) =>
         type === "tabular"
             ? { label: "Tabular", Icon: Table2, className: "text-violet-700" }
             : {
@@ -535,8 +535,8 @@ export function WorkflowList() {
                                 <div className="w-28 shrink-0">
                                     {wf.is_system ? (
                                         <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600">
-                                            <MikeIcon size={14} />
-                                            Mike
+                                            <MatrixAIIcon size={14} />
+                                            MatrixAI
                                         </span>
                                     ) : wf.user_id === user?.id ? (
                                         <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600">

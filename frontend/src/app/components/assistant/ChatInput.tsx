@@ -29,14 +29,14 @@ import {
     isModelAvailable,
     type ModelProvider,
 } from "@/app/lib/modelAvailability";
-import type { MikeDocument, MikeMessage } from "../shared/types";
+import type { MatrixAIDocument, MatrixAIMessage } from "../shared/types";
 
 export interface ChatInputHandle {
-    addDoc: (doc: MikeDocument) => void;
+    addDoc: (doc: MatrixAIDocument) => void;
 }
 
 interface Props {
-    onSubmit: (message: MikeMessage) => void;
+    onSubmit: (message: MatrixAIMessage) => void;
     onCancel: () => void;
     isLoading: boolean;
     hideAddDocButton?: boolean;
@@ -60,7 +60,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
     ref,
 ) {
     const [value, setValue] = useState("");
-    const [attachedDocs, setAttachedDocs] = useState<MikeDocument[]>([]);
+    const [attachedDocs, setAttachedDocs] = useState<MatrixAIDocument[]>([]);
     const [selectedWorkflow, setSelectedWorkflow] = useState<{
         id: string;
         title: string;
@@ -78,7 +78,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
         useState<ModelProvider | null>(null);
 
     useImperativeHandle(ref, () => ({
-        addDoc: (doc: MikeDocument) => {
+        addDoc: (doc: MatrixAIDocument) => {
             setAttachedDocs((prev) => {
                 if (prev.some((d) => d.id === doc.id)) return prev;
                 return [...prev, doc];
@@ -86,7 +86,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
         },
     }));
 
-    const handleAddDocFromProject = useCallback((doc: MikeDocument) => {
+    const handleAddDocFromProject = useCallback((doc: MatrixAIDocument) => {
         setAttachedDocs((prev) => {
             if (prev.some((d) => d.id === doc.id)) return prev;
             return [...prev, doc];
@@ -94,7 +94,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
     }, []);
 
     const handleAddDocsFromSelector = useCallback(
-        (selectedDocs: MikeDocument[]) => {
+        (selectedDocs: MatrixAIDocument[]) => {
             setAttachedDocs((prev) => {
                 const existing = new Set(prev.map((d) => d.id));
                 return [

@@ -4,12 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, Upload } from "lucide-react";
 import { listDocumentVersions } from "@/app/lib/mikeApi";
-import type { MikeDocument } from "./types";
+import type { MatrixAIDocument } from "./types";
 
 interface Props {
     open: boolean;
     onClose: () => void;
-    doc: MikeDocument | null;
+    doc: MatrixAIDocument | null;
     onSubmit: (file: File, displayName: string) => Promise<void>;
 }
 

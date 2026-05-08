@@ -9,10 +9,10 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { uploadStandaloneDocument } from "@/app/lib/mikeApi";
-import type { MikeDocument } from "../shared/types";
+import type { MatrixAIDocument } from "../shared/types";
 
 interface Props {
-    onSelectDoc: (doc: MikeDocument) => void;
+    onSelectDoc: (doc: MatrixAIDocument) => void;
     onBrowseAll: () => void;
     selectedDocIds?: string[];
 }

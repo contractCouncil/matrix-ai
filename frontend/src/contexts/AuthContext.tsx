@@ -1,13 +1,6 @@
 "use client";
 
-import React, {
-    createContext,
-    useContext,
-    useEffect,
-    useState,
-    ReactNode,
-} from "react";
-import { supabase } from "@/lib/supabase";
+import React, { createContext, useContext, ReactNode } from "react";
 
 interface User {
     id: string;
@@ -21,72 +14,22 @@ interface AuthContextType {
     signOut: () => Promise<void>;
 }
 
+const MOCK_USER: User = {
+    id: "00000000-0000-0000-0000-000000000001",
+    email: "dev@local.test",
+};
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
-    const [authLoading, setAuthLoading] = useState(true);
-
-    useEffect(() => {
-        const ensureProfile = async (accessToken: string) => {
-            const apiBase =
-                process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
-            await fetch(`${apiBase}/user/profile`, {
-                method: "POST",
-                headers: { Authorization: `Bearer ${accessToken}` },
-            }).catch((e) => {
-                console.log(e);
-            });
-        };
-
-        const checkUser = async () => {
-            const {
-                data: { session },
-            } = await supabase.auth.getSession();
-
-            if (session?.user) {
-                setUser({
-                    id: session.user.id,
-                    email: session.user.email || "",
-                });
-                ensureProfile(session.access_token);
-            }
-            setAuthLoading(false);
-        };
-
-        checkUser();
-
-        const {
-            data: { subscription },
-        } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            if (session?.user) {
-                setUser({
-                    id: session.user.id,
-                    email: session.user.email || "",
-                });
-                ensureProfile(session.access_token);
-            } else {
-                setUser(null);
-            }
-            setAuthLoading(false);
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, []);
-
-    const signOut = async () => {
-        await supabase.auth.signOut();
-        setUser(null);
-    };
+    const signOut = async () => {};
 
     return (
         <AuthContext.Provider
             value={{
-                user,
-                isAuthenticated: !!user,
-                authLoading,
+                user: MOCK_USER,
+                isAuthenticated: true,
+                authLoading: false,
                 signOut,
             }}
         >

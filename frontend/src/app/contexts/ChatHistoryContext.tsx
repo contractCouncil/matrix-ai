@@ -16,17 +16,17 @@ import {
     listChats,
     renameChat,
 } from "@/app/lib/mikeApi";
-import type { MikeChat, MikeMessage } from "@/app/components/shared/types";
+import type { MatrixAIChat, MatrixAIMessage } from "@/app/components/shared/types";
 
 interface ChatHistoryContextType {
-    chats: MikeChat[] | null;
+    chats: MatrixAIChat[] | null;
     currentChatId: string | null;
     setCurrentChatId: (chatId: string | null) => void;
     loadChats: () => Promise<void>;
     saveChat: (projectId?: string) => Promise<string | null>;
     renameChat: (chatId: string, title: string) => Promise<void>;
-    newChatMessages: MikeMessage[] | null;
-    setNewChatMessages: (messages: MikeMessage[] | null) => void;
+    newChatMessages: MatrixAIMessage[] | null;
+    setNewChatMessages: (messages: MatrixAIMessage[] | null) => void;
     replaceChatId: (
         oldChatId: string,
         newChatId: string,
@@ -41,10 +41,10 @@ const ChatHistoryContext = createContext<ChatHistoryContextType | undefined>(
 
 export function ChatHistoryProvider({ children }: { children: ReactNode }) {
     const { user } = useAuth();
-    const [chats, setChats] = useState<MikeChat[] | null>(null);
+    const [chats, setChats] = useState<MatrixAIChat[] | null>(null);
     const [currentChatId, setCurrentChatId] = useState<string | null>(null);
     const [newChatMessages, setNewChatMessages] = useState<
-        MikeMessage[] | null
+        MatrixAIMessage[] | null
     >(null);
 
     const loadChats = useCallback(async () => {
@@ -106,7 +106,7 @@ export function ChatHistoryProvider({ children }: { children: ReactNode }) {
                     projectId ? { project_id: projectId } : undefined,
                 );
                 const now = new Date().toISOString();
-                const newChat: MikeChat = {
+                const newChat: MatrixAIChat = {
                     id,
                     project_id: projectId ?? null,
                     user_id: user?.id ?? "",
