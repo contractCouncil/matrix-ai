@@ -864,10 +864,12 @@ async function handleDocumentUpload(
     })
     .select("*")
     .single();
-  if (insertErr || !doc)
-    return void res
-      .status(500)
-      .json({ detail: "Failed to create document record" });
+  if (insertErr || !doc) {
+    console.error("[upload] documents insert failed:", insertErr);
+    return void res.status(500).json({
+      detail: `Failed to create document record: ${insertErr?.message ?? "unknown error"}`,
+    });
+  }
 
   try {
     const docId = doc.id as string;

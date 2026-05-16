@@ -1,6 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, ReactNode } from "react";
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useState,
+    ReactNode,
+} from "react";
+import { supabase } from "@/lib/supabase";
 
 interface User {
     id: string;
@@ -14,22 +21,45 @@ interface AuthContextType {
     signOut: () => Promise<void>;
 }
 
-const MOCK_USER: User = {
-    id: "00000000-0000-0000-0000-000000000001",
-    email: "dev@local.test",
-};
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const signOut = async () => {};
+    const [user, setUser] = useState<User | null>(null);
+    const [authLoading, setAuthLoading] = useState(true);
+
+    useEffect(() => {
+        let mounted = true;
+
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!mounted) return;
+            const u = session?.user;
+            setUser(u ? { id: u.id, email: u.email ?? "" } : null);
+            setAuthLoading(false);
+        });
+
+        const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+            const u = session?.user;
+            setUser(u ? { id: u.id, email: u.email ?? "" } : null);
+            setAuthLoading(false);
+        });
+
+        return () => {
+            mounted = false;
+            sub.subscription.unsubscribe();
+        };
+    }, []);
+
+    const signOut = async () => {
+        await supabase.auth.signOut();
+        setUser(null);
+    };
 
     return (
         <AuthContext.Provider
             value={{
-                user: MOCK_USER,
-                isAuthenticated: true,
-                authLoading: false,
+                user,
+                isAuthenticated: !!user,
+                authLoading,
                 signOut,
             }}
         >

@@ -1,12 +1,7 @@
 /**
- * Cloudflare R2 storage utilities for Mike document management.
- * R2 is S3-compatible — uses @aws-sdk/client-s3.
- *
- * Required env vars:
- *   R2_ENDPOINT_URL     — https://<account-id>.r2.cloudflarestorage.com
- *   R2_ACCESS_KEY_ID    — R2 API token (Access Key ID)
- *   R2_SECRET_ACCESS_KEY — R2 API token (Secret Access Key)
- *   R2_BUCKET_NAME      — bucket name (default: "mike")
+ * Storage utilities. Supports two backends:
+ *   - Cloudflare R2 / any S3-compatible service when R2_* env vars are set.
+ *   - Local disk under backend/.local-storage/ otherwise (dev fallback).
  */
 
 import {
@@ -16,6 +11,25 @@ import {
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl as awsGetSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { promises as fs } from "fs";
+import path from "path";
+import crypto from "crypto";
+
+const useR2 = Boolean(
+  process.env.R2_ENDPOINT_URL &&
+    process.env.R2_ACCESS_KEY_ID &&
+    process.env.R2_SECRET_ACCESS_KEY &&
+    !process.env.R2_ENDPOINT_URL.includes("placeholder") &&
+    !process.env.R2_ACCESS_KEY_ID.includes("placeholder"),
+);
+
+const LOCAL_ROOT = path.resolve(process.cwd(), ".local-storage");
+const LOCAL_URL_BASE =
+  process.env.BACKEND_PUBLIC_URL ?? `http://localhost:${process.env.PORT ?? 3001}`;
+const LOCAL_SIGNING_SECRET =
+  process.env.DOWNLOAD_SIGNING_SECRET ??
+  process.env.SUPABASE_SECRET_KEY ??
+  "dev-local-storage-secret";
 
 function getClient(): S3Client {
   return new S3Client({
@@ -30,11 +44,35 @@ function getClient(): S3Client {
 
 const BUCKET = process.env.R2_BUCKET_NAME ?? "mike";
 
-export const storageEnabled = Boolean(
-  process.env.R2_ENDPOINT_URL &&
-  process.env.R2_ACCESS_KEY_ID &&
-  process.env.R2_SECRET_ACCESS_KEY,
-);
+export const storageEnabled = true;
+export const storageMode: "r2" | "local" = useR2 ? "r2" : "local";
+
+function localPathFor(key: string): string {
+  const safe = key.replace(/\.\.+/g, "_");
+  return path.join(LOCAL_ROOT, safe);
+}
+
+function signLocal(key: string, exp: number, disposition?: string): string {
+  const payload = `${key}\n${exp}\n${disposition ?? ""}`;
+  return crypto
+    .createHmac("sha256", LOCAL_SIGNING_SECRET)
+    .update(payload)
+    .digest("hex");
+}
+
+export function verifyLocalSignature(
+  key: string,
+  exp: number,
+  signature: string,
+  disposition?: string,
+): boolean {
+  if (!Number.isFinite(exp) || exp < Math.floor(Date.now() / 1000)) return false;
+  const expected = signLocal(key, exp, disposition);
+  const a = Buffer.from(expected, "hex");
+  const b = Buffer.from(signature, "hex");
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
 
 // ---------------------------------------------------------------------------
 // Upload
@@ -45,6 +83,12 @@ export async function uploadFile(
   content: ArrayBuffer,
   contentType: string,
 ): Promise<void> {
+  if (storageMode === "local") {
+    const filePath = localPathFor(key);
+    await fs.mkdir(path.dirname(filePath), { recursive: true });
+    await fs.writeFile(filePath, Buffer.from(content));
+    return;
+  }
   const client = getClient();
   await client.send(
     new PutObjectCommand({
@@ -61,7 +105,17 @@ export async function uploadFile(
 // ---------------------------------------------------------------------------
 
 export async function downloadFile(key: string): Promise<ArrayBuffer | null> {
-  if (!storageEnabled) return null;
+  if (storageMode === "local") {
+    try {
+      const buf = await fs.readFile(localPathFor(key));
+      return buf.buffer.slice(
+        buf.byteOffset,
+        buf.byteOffset + buf.byteLength,
+      ) as ArrayBuffer;
+    } catch {
+      return null;
+    }
+  }
   try {
     const client = getClient();
     const response = await client.send(
@@ -80,7 +134,14 @@ export async function downloadFile(key: string): Promise<ArrayBuffer | null> {
 // ---------------------------------------------------------------------------
 
 export async function deleteFile(key: string): Promise<void> {
-  if (!storageEnabled) return;
+  if (storageMode === "local") {
+    try {
+      await fs.unlink(localPathFor(key));
+    } catch {
+      // ignore missing files
+    }
+    return;
+  }
   const client = getClient();
   await client.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
 }
@@ -94,13 +155,22 @@ export async function getSignedUrl(
   expiresIn = 3600,
   downloadFilename?: string,
 ): Promise<string | null> {
-  if (!storageEnabled) return null;
+  if (storageMode === "local") {
+    const disposition = downloadFilename
+      ? buildContentDisposition("attachment", downloadFilename)
+      : undefined;
+    const exp = Math.floor(Date.now() / 1000) + expiresIn;
+    const sig = signLocal(key, exp, disposition);
+    const params = new URLSearchParams({
+      key,
+      exp: String(exp),
+      sig,
+    });
+    if (disposition) params.set("disposition", disposition);
+    return `${LOCAL_URL_BASE}/local-storage?${params.toString()}`;
+  }
   try {
     const client = getClient();
-    // Override the response Content-Disposition so the browser uses this
-    // filename on download, instead of the last path segment of the R2 key
-    // (which includes the document UUID). The `download` attribute on <a>
-    // is ignored for cross-origin URLs, so we have to set it server-side.
     const responseContentDisposition = downloadFilename
       ? buildContentDisposition("attachment", downloadFilename)
       : undefined;
@@ -138,6 +208,14 @@ export function buildContentDisposition(
 ): string {
   const normalized = normalizeDownloadFilename(filename);
   return `${kind}; filename="${sanitizeDispositionFilename(normalized)}"; filename*=UTF-8''${encodeRFC5987(normalized)}`;
+}
+
+export async function readLocalFile(key: string): Promise<Buffer | null> {
+  try {
+    return await fs.readFile(localPathFor(key));
+  } catch {
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------

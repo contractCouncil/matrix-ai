@@ -10,22 +10,16 @@ export function getModelProvider(modelId: string): ModelProvider | null {
 
 export function isModelAvailable(
     modelId: string,
-    apiKeys: { claudeApiKey: string | null; geminiApiKey: string | null },
+    _apiKeys: { claudeApiKey: string | null; geminiApiKey: string | null },
 ): boolean {
-    const provider = getModelProvider(modelId);
-    if (!provider) return false;
-    return provider === "claude"
-        ? !!apiKeys.claudeApiKey?.trim()
-        : !!apiKeys.geminiApiKey?.trim();
+    return getModelProvider(modelId) !== null;
 }
 
 export function isProviderAvailable(
-    provider: ModelProvider,
-    apiKeys: { claudeApiKey: string | null; geminiApiKey: string | null },
+    _provider: ModelProvider,
+    _apiKeys: { claudeApiKey: string | null; geminiApiKey: string | null },
 ): boolean {
-    return provider === "claude"
-        ? !!apiKeys.claudeApiKey?.trim()
-        : !!apiKeys.geminiApiKey?.trim();
+    return true;
 }
 
 export function providerLabel(provider: ModelProvider): string {

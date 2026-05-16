@@ -51,11 +51,21 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
 
     const loadProfile = useCallback(async (userId: string) => {
         try {
-            const { data, error } = await supabase
+            let { data, error } = await supabase
                 .from("user_profiles")
                 .select("*")
                 .eq("user_id", userId)
-                .single();
+                .maybeSingle();
+
+            if (!error && !data) {
+                const inserted = await supabase
+                    .from("user_profiles")
+                    .insert({ user_id: userId })
+                    .select("*")
+                    .single();
+                data = inserted.data;
+                error = inserted.error;
+            }
 
             // Define credit limit constant
             const MONTHLY_CREDIT_LIMIT = 999999; // temporarily unlimited
@@ -74,7 +84,7 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
                     creditsResetDate: defaultResetDateStr,
                     creditsRemaining: MONTHLY_CREDIT_LIMIT,
                     tier: "Free",
-                    tabularModel: "gemini-3-flash-preview",
+                    tabularModel: "gemini-2.5-flash",
                     claudeApiKey: null,
                     geminiApiKey: null,
                 });
@@ -108,7 +118,7 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
                     creditsRemaining: creditsRemaining,
                     tier: data.tier || "Free",
                     tabularModel:
-                        data.tabular_model || "gemini-3-flash-preview",
+                        data.tabular_model || "gemini-2.5-flash",
                     claudeApiKey: data.claude_api_key ?? null,
                     geminiApiKey: data.gemini_api_key ?? null,
                 });
@@ -145,7 +155,7 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
                 creditsResetDate: futureResetDate.toISOString(),
                 creditsRemaining: 999999, // temporarily unlimited
                 tier: "Free",
-                tabularModel: "gemini-3-flash-preview",
+                tabularModel: "gemini-2.5-flash",
                 claudeApiKey: null,
                 geminiApiKey: null,
             });

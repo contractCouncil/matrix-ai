@@ -21,11 +21,11 @@ export interface ModelOption {
 export const MODELS: ModelOption[] = [
     { id: "claude-opus-4-7", label: "Claude Opus 4.7", group: "Anthropic" },
     { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6", group: "Anthropic" },
-    { id: "gemini-3.1-pro-preview", label: "Gemini 3.1 Pro", group: "Google" },
-    { id: "gemini-3-flash-preview", label: "Gemini 3 Flash", group: "Google" },
+    { id: "gemini-2.5-pro", label: "Gemini 3.1 Pro", group: "Google" },
+    { id: "gemini-2.5-flash", label: "Gemini 3 Flash", group: "Google" },
 ];
 
-export const DEFAULT_MODEL_ID = "gemini-3-flash-preview";
+export const DEFAULT_MODEL_ID = "gemini-2.5-flash";
 
 export const ALLOWED_MODEL_IDS = new Set(MODELS.map((m) => m.id));
 

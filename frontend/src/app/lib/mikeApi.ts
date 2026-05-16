@@ -41,7 +41,9 @@ async function getAuthHeader(): Promise<Record<string, string>> {
     const {
         data: { session },
     } = await supabase.auth.getSession();
-    if (!session?.access_token) return {};
+    if (!session?.access_token) {
+        throw new Error("Not signed in — please log in before uploading.");
+    }
     return { Authorization: `Bearer ${session.access_token}` };
 }
 
