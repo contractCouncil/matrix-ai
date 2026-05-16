@@ -18,6 +18,7 @@ export const GEMINI_MID_MODELS = ["gemini-2.5-flash"] as const;
 // one in account settings.
 export const CLAUDE_LOW_MODELS = ["claude-haiku-4-5"] as const;
 export const GEMINI_LOW_MODELS = ["gemini-2.5-flash-lite"] as const;
+export const OLLAMA_MODELS = ["qwen3:4b"] as const;
 
 export const DEFAULT_MAIN_MODEL = "gemini-2.5-flash";
 export const DEFAULT_TITLE_MODEL = "gemini-2.5-flash-lite";
@@ -30,6 +31,7 @@ const ALL_MODELS = new Set<string>([
     ...GEMINI_MID_MODELS,
     ...CLAUDE_LOW_MODELS,
     ...GEMINI_LOW_MODELS,
+    ...OLLAMA_MODELS,
 ]);
 
 // ---------------------------------------------------------------------------
@@ -39,6 +41,7 @@ const ALL_MODELS = new Set<string>([
 export function providerForModel(model: string): Provider {
     if (model.startsWith("claude")) return "claude";
     if (model.startsWith("gemini")) return "gemini";
+    if (model.startsWith("qwen") || model.startsWith("ollama")) return "ollama";
     throw new Error(`Unknown model id: ${model}`);
 }
 

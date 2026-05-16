@@ -15,7 +15,7 @@ import { isModelAvailable } from "@/app/lib/modelAvailability";
 export interface ModelOption {
     id: string;
     label: string;
-    group: "Anthropic" | "Google";
+    group: "Anthropic" | "Google" | "Ollama";
 }
 
 export const MODELS: ModelOption[] = [
@@ -23,13 +23,14 @@ export const MODELS: ModelOption[] = [
     { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6", group: "Anthropic" },
     { id: "gemini-2.5-pro", label: "Gemini 3.1 Pro", group: "Google" },
     { id: "gemini-2.5-flash", label: "Gemini 3 Flash", group: "Google" },
+    { id: "qwen3:4b", label: "Qwen3 4B (Local)", group: "Ollama" },
 ];
 
 export const DEFAULT_MODEL_ID = "gemini-2.5-flash";
 
 export const ALLOWED_MODEL_IDS = new Set(MODELS.map((m) => m.id));
 
-const GROUP_ORDER: ModelOption["group"][] = ["Anthropic", "Google"];
+const GROUP_ORDER: ModelOption["group"][] = ["Anthropic", "Google", "Ollama"];
 
 interface Props {
     value: string;
