@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MatrixAIIcon } from "@/components/chat/mike-icon";
+import Image from "next/image";
 
 interface SiteLogoProps {
     size?: "sm" | "md" | "lg" | "xl";
@@ -38,7 +38,14 @@ export function SiteLogo({
                 animate ? "sidebar-fade-in" : ""
             } ${className}`}
         >
-            <MatrixAIIcon size={iconSizes[size]} />
+            <Image
+                src="/logo.jpeg"
+                alt="Matrix AI"
+                width={iconSizes[size]}
+                height={iconSizes[size]}
+                className="rounded"
+                priority
+            />
             <span>Matrix AI</span>
         </h1>
     );
