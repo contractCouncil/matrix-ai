@@ -7,12 +7,12 @@ import { useChatHistoryContext } from "@/app/contexts/ChatHistoryContext";
 import { useGenerateChatTitle } from "./useGenerateChatTitle";
 import type {
     AssistantEvent,
-    MikeCitationAnnotation,
-    MikeMessage,
+    MatrixAICitationAnnotation,
+    MatrixAIMessage,
 } from "@/app/components/shared/types";
 
 interface UseAssistantChatOptions {
-    initialMessages?: MikeMessage[];
+    initialMessages?: MatrixAIMessage[];
     chatId?: string;
     projectId?: string;
 }
@@ -39,7 +39,7 @@ export function useAssistantChat({
     } = useChatHistoryContext();
     const { generate: generateTitle } = useGenerateChatTitle();
 
-    const [messages, setMessages] = useState<MikeMessage[]>(initialMessages);
+    const [messages, setMessages] = useState<MatrixAIMessage[]>(initialMessages);
     const [isResponseLoading, setIsResponseLoading] = useState(false);
     const [isLoadingCitations, setIsLoadingCitations] = useState(false);
     const [chatId, setChatId] = useState<string | undefined>(initialChatId);
@@ -60,10 +60,10 @@ export function useAssistantChat({
     };
 
     const updateLastContentEvent = (
-        prev: MikeMessage[],
+        prev: MatrixAIMessage[],
         text: string,
         isStreaming?: boolean,
-    ): MikeMessage[] => {
+    ): MatrixAIMessage[] => {
         const updated = [...prev];
         const last = updated[updated.length - 1];
         if (last?.role !== "assistant") return prev;
@@ -273,7 +273,7 @@ export function useAssistantChat({
     };
 
     const handleChat = async (
-        message: MikeMessage,
+        message: MatrixAIMessage,
         opts?: {
             displayedDoc?: { filename: string; documentId: string } | null;
         },
@@ -288,7 +288,7 @@ export function useAssistantChat({
             lastMessage.role === "user" &&
             lastMessage.content === message.content;
 
-        const newMessages: MikeMessage[] = isMessageAlreadyAdded
+        const newMessages: MatrixAIMessage[] = isMessageAlreadyAdded
             ? messages
             : [...messages, message];
 
@@ -743,7 +743,7 @@ export function useAssistantChat({
                                     download_url:
                                         (data.download_url as string) ?? "",
                                     annotations: Array.isArray(data.annotations)
-                                        ? (data.annotations as import("@/app/components/shared/types").MikeEditAnnotation[])
+                                        ? (data.annotations as import("@/app/components/shared/types").MatrixAIEditAnnotation[])
                                         : [],
                                     error:
                                         typeof data.error === "string"
@@ -762,7 +762,7 @@ export function useAssistantChat({
                             // finalised message.
                             clearStreamingPlaceholders();
                             const incoming = (data.citations ??
-                                []) as MikeCitationAnnotation[];
+                                []) as MatrixAICitationAnnotation[];
                             setMessages((prev) => {
                                 const updated = [...prev];
                                 const last = updated[updated.length - 1];
@@ -906,7 +906,7 @@ export function useAssistantChat({
     };
 
     const handleNewChat = async (
-        message: MikeMessage,
+        message: MatrixAIMessage,
         projectId?: string,
     ): Promise<string | null> => {
         if (!message.content.trim()) return null;

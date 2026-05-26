@@ -23,6 +23,15 @@ const useR2 = Boolean(
     !process.env.R2_ACCESS_KEY_ID.includes("placeholder"),
 );
 
+// Serverless filesystems are ephemeral; local-disk storage cannot work on
+// Vercel/Lambda. Fail fast at boot with a clear message instead of silently
+// writing files that vanish between invocations.
+if (!useR2 && (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME)) {
+  throw new Error(
+    "Storage misconfigured: R2_ENDPOINT_URL / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY must be set in serverless environments (local-disk mode is not supported).",
+  );
+}
+
 const LOCAL_ROOT = path.resolve(process.cwd(), ".local-storage");
 const LOCAL_URL_BASE =
   process.env.BACKEND_PUBLIC_URL ?? `http://localhost:${process.env.PORT ?? 3001}`;

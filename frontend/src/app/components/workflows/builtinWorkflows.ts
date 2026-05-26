@@ -1,6 +1,6 @@
-import type { MikeWorkflow } from "../shared/types";
+import type { MatrixAIWorkflow } from "../shared/types";
 
-export const BUILT_IN_WORKFLOWS: MikeWorkflow[] = [
+export const BUILT_IN_WORKFLOWS: MatrixAIWorkflow[] = [
     {
         id: "builtin-cp-checklist",
         user_id: null,
